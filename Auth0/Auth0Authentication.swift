@@ -319,7 +319,7 @@ struct Auth0Authentication: Authentication {
     }
 
     func associate(mfaToken: String,
-                   with types: [Authenticator.Types],
+                   with type: Authenticator.Types,
                    phoneNumber: String? = nil,
                    email: String? = nil) -> Request<Authenticator, AuthenticationError> {
 
@@ -337,28 +337,18 @@ struct Auth0Authentication: Authentication {
         var authenticatorTypes: [String] = []
         var authenticatorChannels: [String] = []
         
-        // add the oob type if we're dealing with emals or sms
-        if types.contains(.email) || types.contains(.sms) {
-            authenticatorTypes.append("oob")
-        }
- 
-        // add the otp type if we're dealing with one time passwords
-        if types.contains(.otp) {
+        // check the type
+        switch type {
+        case .otp:
             authenticatorTypes.append("otp")
-        }
-        
-        // add the email channel
-        if types.contains(.email),
-           let email = email {
+        case .email:
+            authenticatorTypes.append("oob")
             authenticatorChannels.append("email")
-            payload["email"] = email
-        }
-        
-        // add the phonenumber if we're dealing with sms and we have the number
-        if types.contains(.sms),
-           let phone = phoneNumber {
+            payload["email"] = email ?? ""
+        case .sms:
+            authenticatorTypes.append("oob")
             authenticatorChannels.append("sms")
-            payload["phone_number"] = phone
+            payload["phone_number"] = phoneNumber ?? ""
         }
         
         // set the authenticator types array

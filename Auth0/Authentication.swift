@@ -641,7 +641,7 @@ public protocol Authentication: Trackable, Loggable {
      ```
      Auth0
          .authentication(clientId: clientId, domain: "samples.auth0.com")
-         .associate(mfaToken: token, types: typeList)
+         .associate(mfaToken: token, type: type)
          .start { result in
              switch result {
              case .success(let credentials):
@@ -654,14 +654,14 @@ public protocol Authentication: Trackable, Loggable {
 
      - Parameters:
        - mfaToken: Token returned when authentication fails with an ``AuthenticationError/isMultifactorRequired`` error due to MFA requirement.
-       - typeList: List of Authenticator types
+       - type: Authenticator type
      - Returns:
      - Requires:
      - See: [Authentication API Endpoint](https://auth0.com/docs/api/authentication#add-an-authenticator)
     
      */
     func associate(mfaToken: String,
-                   with types: [Authenticator.Types],
+                   with types: Authenticator.Types,
                    phoneNumber: String?,
                    email: String?) -> Request<Authenticator, AuthenticationError>
 }
@@ -717,11 +717,11 @@ public extension Authentication {
     }
 
     func associate(mfaToken: String,
-                   with types: [Authenticator.Types],
+                   with type: Authenticator.Types,
                    phoneNumber: String? = nil,
                    email: String? = nil) -> Request<Authenticator, AuthenticationError> {
         return self.associate(mfaToken: mfaToken,
-                              with: types,
+                              with: type,
                               phoneNumber: phoneNumber,
                               email: email)
     }
