@@ -98,6 +98,25 @@ public struct AuthenticationError: Auth0APIError {
     public var isPasswordAlreadyUsed: Bool {
         return self.code == "invalid_password" && self.info["name"] as? String == "PasswordHistoryError"
     }
+    
+    /// When the user hasn't already enrolled to a MFA Authenticator
+    public var requireAssociation: Bool {
+        get {
+            // default to false
+            self.code == "association_required"
+        }
+    }
+    
+    /// The MFA token
+    public var multifactorToken: String? {
+        get {
+            if let mfaToken = self.info["mfa_token"] as? String {
+                return mfaToken
+            }
+            
+            return nil
+        }
+    }
 
     /// When an Auth0 rule returns an error.
     /// The message returned by the rule is available in ``localizedDescription``.

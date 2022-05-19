@@ -318,6 +318,69 @@ struct Auth0Authentication: Authentication {
                        telemetry: self.telemetry)
     }
 
+    func associate(mfaToken: String,
+                   with types: [Authenticator.Types],
+                   phoneNumber: String? = nil,
+                   email: String? = nil) -> Request<Authenticator, AuthenticationError> {
+
+        // TODO: can this API actually handle MULTIPLE types?
+        
+        // create the url
+        let url = URL(string: "mfa/associate", relativeTo: self.url)!
+
+        // initiate the payload with client_id
+        var payload: [String: Any] = [
+            "client_id": self.clientId,
+        ]
+        
+        // handle authenticator types
+        var authenticatorTypes: [String] = []
+        var authenticatorChannels: [String] = []
+        
+        // add the oob type if we're dealing with emals or sms
+        if types.contains(.email) || types.contains(.sms) {
+            authenticatorTypes.append("oob")
+        }
+ 
+        // add the otp type if we're dealing with one time passwords
+        if types.contains(.otp) {
+            authenticatorTypes.append("otp")
+        }
+        
+        // add the email channel
+        if types.contains(.email),
+           let email = email {
+            authenticatorChannels.append("email")
+            payload["email"] = email
+        }
+        
+        // add the phonenumber if we're dealing with sms and we have the number
+        if types.contains(.sms),
+           let phone = phoneNumber {
+            authenticatorChannels.append("sms")
+            payload["phone_number"] = phone
+        }
+        
+        // set the authenticator types array
+        if !authenticatorTypes.isEmpty {
+            payload["authenticator_types"] = authenticatorTypes
+        }
+
+        // set channels
+        if !authenticatorChannels.isEmpty {
+            payload["oob_channels"] = authenticatorChannels
+        }
+        
+        // return the request
+        return Request(session: session,
+                       url: url,
+                       method: "POST",
+                       handle: codable,
+                       parameters: payload,
+                       headers: ["Authorization": "Bearer \(mfaToken)"],
+                       logger: self.logger,
+                       telemetry: self.telemetry)
+    }
 }
 
 // MARK: - Private Methods
