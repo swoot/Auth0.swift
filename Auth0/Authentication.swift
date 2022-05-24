@@ -664,6 +664,11 @@ public protocol Authentication: Trackable, Loggable {
                    with types: Authenticator.Types,
                    phoneNumber: String?,
                    email: String?) -> Request<Authenticator, AuthenticationError>
+    
+    /**
+     TODO: need this
+     */
+    func generateAuthorize(with connection: String) -> AuthorizeInfo?
 }
 
 public extension Authentication {
@@ -724,5 +729,9 @@ public extension Authentication {
                               with: type,
                               phoneNumber: phoneNumber,
                               email: email)
+    }
+    
+    func generateAuthorize(with connection: String) -> AuthorizeInfo? {
+        return self.generateAuthorize(with: connection)
     }
 }

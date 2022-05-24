@@ -323,8 +323,6 @@ struct Auth0Authentication: Authentication {
                    phoneNumber: String? = nil,
                    email: String? = nil) -> Request<Authenticator, AuthenticationError> {
 
-        // TODO: can this API actually handle MULTIPLE types?
-        
         // create the url
         let url = URL(string: "mfa/associate", relativeTo: self.url)!
 
@@ -370,6 +368,61 @@ struct Auth0Authentication: Authentication {
                        headers: ["Authorization": "Bearer \(mfaToken)"],
                        logger: self.logger,
                        telemetry: self.telemetry)
+    }
+    
+    func generateAuthorize(with connection: String) -> AuthorizeInfo? {
+        
+        // create the url and its components
+        guard let url = URL(string: "authorize", relativeTo: self.url),
+              let redirectUrl = redirectUri(url: self.url),
+              var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true)
+        else {
+            return nil
+        }
+        
+        let authorizeState = UUID().uuidString
+        let redirectUri = redirectUrl.absoluteString
+        
+        // params
+        let params: [String: Any] = [
+            "client_id": self.clientId,
+            "connection": connection,
+            "response_type": "code", // needs to be code ?
+            "scope": defaultScope,
+            "state": authorizeState,
+            "redirect_uri": redirectUri
+        ]
+        
+        // get queryitems
+        var queryItems = urlComponents.queryItems ?? []
+        let newQueryItems = params.map {
+            URLQueryItem(name: $0.key, value: String(describing: $0.value))
+        }
+        
+        // append
+        queryItems.append(contentsOf: newQueryItems)
+        
+        // set the query items
+        urlComponents.queryItems = queryItems
+        
+        // set the percent encodedQuery
+        urlComponents.percentEncodedQuery = urlComponents.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        
+        // get the full url and the scheme
+        guard
+            let fullUrl = urlComponents.url,
+            let scheme = redirectUrl.scheme
+        else {
+            return nil
+        }
+        
+        // return the info we used
+        return AuthorizeInfo(
+            url: fullUrl,
+            scheme: scheme,
+            redirectUri: redirectUri,
+            state: authorizeState
+        )
     }
 }
 
