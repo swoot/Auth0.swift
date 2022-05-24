@@ -383,15 +383,24 @@ struct Auth0Authentication: Authentication {
         let authorizeState = UUID().uuidString
         let redirectUri = redirectUrl.absoluteString
         
+        // here comes the challenger
+        let generator = ChallengeGenerator()
+        
         // params
         let params: [String: Any] = [
             "client_id": self.clientId,
             "connection": connection,
-            "response_type": "code", // needs to be code ?
+            "response_type": "code",
             "scope": defaultScope,
             "state": authorizeState,
-            "redirect_uri": redirectUri
+            "redirect_uri": redirectUri,
+            "code_challenge": generator.challenge,
+            "code_challenge_method": generator.method
         ]
+        
+        // TODO: need generator
+        //"code_challenge": challenge,
+        //"code_challenge_method": method
         
         // get queryitems
         var queryItems = urlComponents.queryItems ?? []
@@ -421,7 +430,8 @@ struct Auth0Authentication: Authentication {
             url: fullUrl,
             scheme: scheme,
             redirectUri: redirectUri,
-            state: authorizeState
+            state: authorizeState,
+            verifier: generator.verifier
         )
     }
 }

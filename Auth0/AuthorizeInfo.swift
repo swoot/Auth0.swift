@@ -12,4 +12,5 @@ public struct AuthorizeInfo { // : Codable
     public let scheme: String
     public let redirectUri: String
     public let state: String
+    public let verifier: String
 }
