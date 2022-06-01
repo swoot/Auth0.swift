@@ -78,7 +78,7 @@ public struct AuthenticationError: Auth0APIError {
 
     /// When the MFA code sent is invalid or expired.
     public var isMultifactorCodeInvalid: Bool {
-        return self.code == "a0.mfa_invalid_code" || self.code == "invalid_grant" && self.localizedDescription == "Invalid otp_code."
+        return self.code == "a0.mfa_invalid_code" || self.code == "invalid_grant" && (self.localizedDescription == "Invalid otp_code." || self.localizedDescription == "Invalid binding_code.")
     }
 
     /// When the MFA token is invalid or expired.
