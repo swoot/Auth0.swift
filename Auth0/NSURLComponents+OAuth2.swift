@@ -1,7 +1,7 @@
 #if WEB_AUTH_PLATFORM
 import Foundation
 
-public extension URLComponents {
+extension URLComponents {
 
     var fragmentValues: [String: String] {
         var dict: [String: String] = [:]
